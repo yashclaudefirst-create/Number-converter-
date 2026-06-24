@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Systems Converter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+
+  header .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  header h1 {
+    font-family: var(--mono);
+    font-size: clamp(22px, 5vw, 38px);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* Input section */
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 24px 0 16px;
+  }
+
+  @media (max-width: 600px) { .input-grid { grid-template-columns: 1fr; } }
+
+  .field {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+
+  .field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+  }
+
+  .field.error {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+    animation: shake 0.3s ease;
+  }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}
+  }
+
+  .field-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field-label .badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+
+  .dec-label { color: var(--accent); }
+  .dec-badge { background: rgba(0,212,255,0.15); color: var(--accent); }
+  .bin-label { color: var(--accent3); }
+  .bin-badge { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .oct-label { color: var(--accent4); }
+  .oct-badge { background: rgba(245,158,11,0.15); color: var(--accent4); }
+  .hex-label { color: var(--accent2); }
+  .hex-badge { background: rgba(124,58,237,0.15); color: var(--accent2); }
+
+  .field input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    padding: 4px 0;
+  }
+
+  .field input::placeholder { color: var(--muted); font-weight: 300; }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-family: var(--mono);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--accent3); color: var(--accent3); }
+
+  /* Bit Visualizer */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .bit-toggle {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .bit-toggle button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-family: var(--mono);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .bit-toggle button.active {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .bit-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .bit-group {
+    display: flex;
+    gap: 3px;
+    margin-right: 8px;
+  }
+
+  .bit-block {
+    width: 28px;
+    height: 36px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
+    position: relative;
+    cursor: default;
+  }
+
+  .bit-block.on {
+    background: linear-gradient(135deg, rgba(0,212,255,0.25), rgba(0,212,255,0.1));
+    border: 1px solid rgba(0,212,255,0.5);
+    color: var(--accent);
+    box-shadow: 0 0 8px rgba(0,212,255,0.2);
+  }
+
+  .bit-block.off {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .bit-index {
+    font-size: 7px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ASCII display */
+  .ascii-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .ascii-char {
+    font-family: var(--mono);
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--accent2);
+    min-width: 50px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .ascii-info {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* Color preview */
+  .color-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .color-swatch {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  .color-info {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 2;
+  }
+
+  /* Step-by-step */
+  .steps-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-family: var(--mono);
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .steps-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .steps-toggle .arrow { transition: transform 0.2s; }
+  .steps-toggle.open .arrow { transform: rotate(90deg); }
+
+  .steps-content {
+    display: none;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 2;
+  }
+  .steps-content.open { display: block; }
+
+  .step-row {
+    display: flex;
+    gap: 12px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .step-row:last-child { border: none; }
+  .step-num { color: var(--muted); min-width: 20px; }
+  .step-op { color: var(--accent4); min-width: 80px; }
+  .step-res { color: var(--accent3); }
+  .step-rem { color: var(--accent2); }
+
+  .steps-title {
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* History */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: border 0.2s;
+    border: 1px solid transparent;
+  }
+  .history-item:hover { border-color: var(--border); }
+
+  .history-dec { color: var(--accent); }
+  .history-meta { color: var(--muted); }
+  .history-clear {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-family: var(--mono);
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    float: right;
+  }
+  .history-clear:hover { border-color: var(--red); color: var(--red); }
+
+  /* Keyboard hints */
+  .hints {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .hint {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  kbd {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text);
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: var(--mono);
+    padding: 16px;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .glitch {
+    animation: glitch 0.1s ease;
+  }
+  @keyframes glitch {
+    0%{transform:translateX(0)} 30%{transform:translateX(-2px)} 70%{transform:translateX(2px)} 100%{transform:translateX(0)}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <span class="tag">// dev tool</span>
+    <h1>Number Systems Converter</h1>
+    <p>Decimal · Binary · Octal · Hexadecimal — real-time, bidirectional</p>
+  </header>
+
+  <!-- Input Fields -->
+  <div class="input-grid">
+    <div class="field" id="field-dec">
+      <div class="field-label dec-label">
+        <span>Decimal</span>
+        <span class="badge dec-badge">BASE 10</span>
+      </div>
+      <button class="copy-btn" onclick="copyField('dec')">COPY</button>
+      <input type="text" id="dec" placeholder="0" maxlength="20" oninput="convert('dec')" />
+    </div>
+    <div class="field" id="field-bin">
+      <div class="field-label bin-label">
+        <span>Binary</span>
+        <span class="badge bin-badge">BASE 2</span>
+      </div>
+      <button class="copy-btn" onclick="copyField('bin')">COPY</button>
+      <input type="text" id="bin" placeholder="0" maxlength="64" oninput="convert('bin')" />
+    </div>
+    <div class="field" id="field-oct">
+      <div class="field-label oct-label">
+        <span>Octal</span>
+        <span class="badge oct-badge">BASE 8</span>
+      </div>
+      <button class="copy-btn" onclick="copyField('oct')">COPY</button>
+      <input type="text" id="oct" placeholder="0" maxlength="22" oninput="convert('oct')" />
+    </div>
+    <div class="field" id="field-hex">
+      <div class="field-label hex-label">
+        <span>Hexadecimal</span>
+        <span class="badge hex-badge">BASE 16</span>
+      </div>
+      <button class="copy-btn" onclick="copyField('hex')">COPY</button>
+      <input type="text" id="hex" placeholder="0" maxlength="16" oninput="convert('hex')" />
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Bit Visualizer -->
+    <div class="section">
+      <div class="section-title">Bit Visualizer</div>
+      <div class="bit-toggle">
+        <button class="active" onclick="setBits(8, this)">8-bit</button>
+        <button onclick="setBits(16, this)">16-bit</button>
+        <button onclick="setBits(32, this)">32-bit</button>
+      </div>
+      <div class="bit-grid" id="bit-grid"></div>
+    </div>
+
+    <!-- ASCII -->
+    <div class="section">
+      <div class="section-title">ASCII Character</div>
+      <div class="ascii-display">
+        <div class="ascii-char" id="ascii-char">—</div>
+        <div class="ascii-info" id="ascii-info">Enter a decimal value<br>0–127 to see its<br>ASCII character</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hex Color Preview -->
+  <div class="section" id="color-section" style="display:none">
+    <div class="section-title">Hex Color Preview</div>
+    <div class="color-preview">
+      <div class="color-swatch" id="color-swatch"></div>
+      <div class="color-info" id="color-info"></div>
+    </div>
+  </div>
+
+  <!-- Step by Step -->
+  <div class="section">
+    <div class="section-title">Step-by-Step Conversion <span style="font-size:9px;color:var(--accent);margin-left:6px">ALL 11 PATHS</span></div>
+    <button class="steps-toggle" id="steps-btn" onclick="toggleSteps()">
+      <span class="arrow">▶</span> Show conversion math
+    </button>
+    <div class="steps-content" id="steps-content"></div>
+  </div>
+
+  <!-- History + Shortcuts -->
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">Conversion History</div>
+      <button class="history-clear" onclick="clearHistory()">CLEAR</button>
+      <div style="clear:both;height:8px"></div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state">No conversions yet</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Keyboard Shortcuts</div>
+      <div class="hints">
+        <div class="hint"><kbd>Tab</kbd> jump between fields</div>
+        <div class="hint"><kbd>Ctrl</kbd>+<kbd>A</kbd> select all</div>
+        <div class="hint"><kbd>Esc</kbd> clear all</div>
+        <div class="hint"><kbd>Ctrl</kbd>+<kbd>C</kbd> copy focused</div>
+        <div class="hint"><kbd>↑</kbd> / <kbd>↓</kbd> increment/decrement decimal</div>
+      </div>
+      <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border)">
+        <div class="section-title" style="margin-bottom:10px">Valid Characters</div>
+        <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--muted)">
+          <span style="color:var(--accent)">DEC</span> → 0–9<br>
+          <span style="color:var(--accent3)">BIN</span> → 0, 1<br>
+          <span style="color:var(--accent4)">OCT</span> → 0–7<br>
+          <span style="color:var(--accent2)">HEX</span> → 0–9, A–F
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let bitSize = 8;
+let history = [];
+let stepsOpen = false;
+let currentDecimal = null;
+
+const validators = {
+  dec: /^[0-9]*$/,
+  bin: /^[01]*$/,
+  oct: /^[0-7]*$/,
+  hex: /^[0-9a-fA-F]*$/
+};
+
+function convert(from) {
+  const input = document.getElementById(from);
+  const val = input.value.trim();
+  const field = document.getElementById('field-' + from);
+
+  // Validate
+  if (!validators[from].test(val)) {
+    field.classList.add('error');
+    setTimeout(() => field.classList.remove('error'), 500);
+    input.value = val.slice(0, -1);
+    return;
+  }
+
+  field.classList.remove('error');
+
+  if (val === '' || val === null) {
+    ['dec','bin','oct','hex'].filter(b => b !== from).forEach(b => {
+      document.getElementById(b).value = '';
+    });
+    currentDecimal = null;
+    updateBits(0);
+    updateAscii(null);
+    updateColor(null);
+    updateSteps(null, null);
+    return;
+  }
+
+  let decVal;
+  try {
+    switch(from) {
+      case 'dec': decVal = parseInt(val, 10); break;
+      case 'bin': decVal = parseInt(val, 2); break;
+      case 'oct': decVal = parseInt(val, 8); break;
+      case 'hex': decVal = parseInt(val, 16); break;
+    }
+  } catch(e) { return; }
+
+  if (isNaN(decVal) || decVal < 0) return;
+  if (decVal > 4294967295) { // 32-bit max
+    document.getElementById('field-' + from).classList.add('error');
+    setTimeout(() => document.getElementById('field-' + from).classList.remove('error'), 400);
+    return;
+  }
+
+  currentDecimal = decVal;
+
+  if (from !== 'dec') document.getElementById('dec').value = decVal;
+  if (from !== 'bin') document.getElementById('bin').value = decVal.toString(2);
+  if (from !== 'oct') document.getElementById('oct').value = decVal.toString(8);
+  if (from !== 'hex') document.getElementById('hex').value = decVal.toString(16).toUpperCase();
+
+  // Hex always uppercase
+  if (from === 'hex') input.value = val.toUpperCase();
+
+  updateBits(decVal);
+  updateAscii(decVal);
+  updateColor(decVal);
+  updateSteps(decVal, from);
+  addHistory(decVal);
+}
+
+function setBits(n, btn) {
+  bitSize = n;
+  document.querySelectorAll('.bit-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (currentDecimal !== null) updateBits(currentDecimal);
+  else updateBits(0);
+}
+
+function updateBits(decVal) {
+  const grid = document.getElementById('bit-grid');
+  const bin = decVal.toString(2).padStart(bitSize, '0').slice(-bitSize);
+  grid.innerHTML = '';
+
+  // Group by 4
+  const groups = [];
+  for (let i = 0; i < bitSize; i += 4) groups.push(bin.slice(i, i+4));
+
+  groups.forEach((group, gi) => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'bit-group';
+    group.split('').forEach((bit, bi) => {
+      const idx = gi * 4 + bi;
+      const power = bitSize - 1 - idx;
+      const block = document.createElement('div');
+      block.className = 'bit-block ' + (bit === '1' ? 'on' : 'off');
+      block.innerHTML = `${bit}<div class="bit-index">${power}</div>`;
+      block.title = `Bit ${power} = ${bit} (value: ${bit === '1' ? Math.pow(2, power) : 0})`;
+      groupEl.appendChild(block);
+    });
+    grid.appendChild(groupEl);
+  });
+}
+
+function updateAscii(decVal) {
+  const char = document.getElementById('ascii-char');
+  const info = document.getElementById('ascii-info');
+  if (decVal === null || decVal > 127) {
+    char.textContent = '—';
+    info.innerHTML = decVal > 127 ? 'Value > 127<br>outside ASCII range' : 'Enter a value<br>between 0–127';
+    return;
+  }
+  const c = String.fromCharCode(decVal);
+  const isPrintable = decVal >= 32 && decVal <= 126;
+  char.textContent = isPrintable ? c : '␀';
+  const names = {0:'NULL',7:'BEL',8:'BS',9:'TAB',10:'LF',13:'CR',27:'ESC',32:'SPACE',127:'DEL'};
+  const name = names[decVal] || (isPrintable ? `'${c}'` : `CTRL+${decVal}`);
+  info.innerHTML = `Char: <span style="color:var(--accent2)">${name}</span><br>Printable: <span style="color:var(--accent3)">${isPrintable ? 'Yes' : 'No'}</span><br>Code: <span style="color:var(--accent4)">U+${decVal.toString(16).toUpperCase().padStart(4,'0')}</span>`;
+}
+
+function updateColor(decVal) {
+  const section = document.getElementById('color-section');
+  const swatch = document.getElementById('color-swatch');
+  const info = document.getElementById('color-info');
+  const hexVal = document.getElementById('hex').value;
+
+  if (hexVal.length === 6) {
+    section.style.display = 'block';
+    const hex6 = '#' + hexVal;
+    swatch.style.background = hex6;
+    const r = parseInt(hexVal.slice(0,2),16);
+    const g = parseInt(hexVal.slice(2,4),16);
+    const b = parseInt(hexVal.slice(4,6),16);
+    const brightness = (r*299 + g*587 + b*114) / 1000;
+    info.innerHTML = `HEX: <span style="color:var(--accent2)">${hex6.toUpperCase()}</span><br>RGB: <span style="color:var(--accent)">rgb(${r}, ${g}, ${b})</span><br>Brightness: <span style="color:var(--accent4)">${Math.round(brightness)} / 255</span><br>Tone: <span style="color:var(--accent3)">${brightness > 128 ? 'Light' : 'Dark'}</span>`;
+  } else if (hexVal.length === 3) {
+    section.style.display = 'block';
+    const exp = '#' + hexVal[0]+hexVal[0]+hexVal[1]+hexVal[1]+hexVal[2]+hexVal[2];
+    swatch.style.background = exp;
+    info.innerHTML = `HEX shorthand: <span style="color:var(--accent2)">#${hexVal.toUpperCase()}</span><br>Expanded: <span style="color:var(--accent)">${exp.toUpperCase()}</span>`;
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+function divisionSteps(decVal, base, color, hexMap) {
+  // Builds the divide-and-track-remainders rows, plus a "building the answer"
+  // strip that shows the remainders being stacked in the order they're read.
+  let n = decVal, steps = [];
+  while (n > 0) {
+    steps.push([n, Math.floor(n/base), n%base]);
+    n = Math.floor(n/base);
+  }
+  let rows = '';
+  steps.forEach(([num, q, r], i) => {
+    const symbol = hexMap ? hexMap[r] : r;
+    rows += `<div class="step-row">
+      <span class="step-num">${i+1}.</span>
+      <span class="step-op">${num} ÷ ${base} =</span>
+      <span class="step-res">${q}</span>
+      <span style="color:var(--muted)"> remainder </span>
+      <span class="step-rem">${r}${hexMap ? ' → ' + symbol : ''}</span>
+      ${q === 0 ? `<span style="color:var(--muted)"> (we stop — nothing left to divide)</span>` : ''}
+    </div>`;
+  });
+
+  // The remainders come out LAST digit first, so we reverse them to read the answer.
+  const digitsInOrder = steps.map(s => hexMap ? hexMap[s[2]] : s[2]); // order produced
+  const digitsReversed = [...digitsInOrder].reverse(); // order read (= final answer)
+
+  const stack = digitsInOrder.map((d, i) =>
+    `<span style="color:${color};opacity:${0.4 + 0.6*(i/(digitsInOrder.length-1||1))}">${d}</span>`
+  ).join(' <span style="color:var(--muted)">→</span> ');
+
+  rows += `<div class="step-row" style="margin-top:6px;flex-wrap:wrap">
+    <span style="color:var(--muted)">Remainders, in the order we found them:</span>&nbsp;<b>${stack}</b>
+  </div>`;
+  rows += `<div class="step-row" style="margin-top:2px">
+    <span style="color:var(--muted)">Flip that order (last found → first) to get the answer:</span>
+  </div>`;
+  rows += `<div class="step-row" style="margin-top:2px">
+    <span style="color:${color}">→ Answer: <b>${digitsReversed.join('')}</b></span>
+  </div>`;
+  return rows;
+}
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+function positionExpand(str, base, color, hexMap) {
+  // Shows the positional-value expansion (used for → Decimal paths)
+  const digits = str.split('');
+  const n = digits.length;
+  let terms = digits.map((d, i) => {
+    const pos = n - 1 - i;
+    const dVal = hexMap ? parseInt(d, 16) : parseInt(d);
+    const contrib = dVal * Math.pow(base, pos);
+    return { d, pos, dVal, contrib };
+  });
+  let expr = terms.map(t =>
+    `<span style="color:${t.dVal > 0 ? color : 'var(--muted)'}">` +
+    `${t.d}×${base}<sup>${t.pos}</sup>` +
+    (t.dVal > 0 ? `=${t.contrib}` : '') +
+    `</span>`
+  ).join(' <span style="color:var(--muted)">+</span> ');
+  let sum = terms.filter(t => t.dVal > 0).map(t => t.contrib);
+  return { expr, sum };
+}
+
+function binaryToOctalGrouped(binStr) {
+  // Groups bits into triplets from the right, each triplet = one octal digit
+  const padded = binStr.padStart(Math.ceil(binStr.length / 3) * 3, '0');
+  const groups = padded.match(/.{3}/g);
+  return groups.map(g => ({ bits: g, oct: parseInt(g, 2).toString() }));
+}
+
+function binaryToHexGrouped(binStr) {
+  // Groups bits into nibbles (4) from the right
+  const padded = binStr.padStart(Math.ceil(binStr.length / 4) * 4, '0');
+  const groups = padded.match(/.{4}/g);
+  return groups.map(g => ({ bits: g, hex: parseInt(g, 2).toString(16).toUpperCase() }));
+}
+
+// ── section builders ──────────────────────────────────────────────────────────
+
+function section_dtob(decVal) {
+  let h = `<div class="steps-title">▸ DECIMAL → BINARY</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Keep dividing by <b>2</b> and track each remainder (0 or 1). Stop when you reach 0. Read remainders bottom-to-top.</div>`;
+  if (decVal === 0) return h + `<div class="step-row" style="color:var(--accent3)">0 in any base is still 0.</div>`;
+  return h + divisionSteps(decVal, 2, 'var(--accent3)');
+}
+
+function section_btod(decVal) {
+  const binStr = decVal.toString(2);
+  let h = `<div class="steps-title">▸ BINARY → DECIMAL</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Each bit represents a power of 2 (right-to-left starting at 2⁰). Multiply each bit by its power, then sum.</div>`;
+  const { expr, sum } = positionExpand(binStr, 2, 'var(--accent)', null);
+  h += `<div class="step-row" style="flex-wrap:wrap;gap:6px">${expr}</div>`;
+  h += sum.length
+    ? `<div class="step-row" style="color:var(--muted)">Sum: ${sum.join(' + ')} = <b style="color:var(--accent3)">${decVal}</b></div>`
+    : `<div class="step-row" style="color:var(--accent3)">All bits are 0 → value is <b>0</b>.</div>`;
+  return h;
+}
+
+function section_dtoo(decVal) {
+  let h = `<div class="steps-title">▸ DECIMAL → OCTAL</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Divide by <b>8</b> repeatedly. Each remainder (0–7) is one octal digit. Read bottom-to-top.</div>`;
+  if (decVal === 0) return h + `<div class="step-row" style="color:var(--accent4)">0 is 0 in any base.</div>`;
+  return h + divisionSteps(decVal, 8, 'var(--accent4)');
+}
+
+function section_otod(decVal) {
+  const octStr = decVal.toString(8);
+  let h = `<div class="steps-title">▸ OCTAL → DECIMAL</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Each octal digit represents a power of 8 (right-to-left starting at 8⁰). Multiply and sum.</div>`;
+  const { expr, sum } = positionExpand(octStr, 8, 'var(--accent4)', null);
+  h += `<div class="step-row" style="flex-wrap:wrap;gap:6px">${expr}</div>`;
+  h += sum.length
+    ? `<div class="step-row" style="color:var(--muted)">Sum: ${sum.join(' + ')} = <b style="color:var(--accent3)">${decVal}</b></div>`
+    : `<div class="step-row" style="color:var(--accent3)">Value is <b>0</b>.</div>`;
+  return h;
+}
+
+function section_dtoh(decVal) {
+  let h = `<div class="steps-title">▸ DECIMAL → HEX</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Divide by <b>16</b>. Remainders 0–9 stay as-is; 10→A, 11→B, 12→C, 13→D, 14→E, 15→F. Read bottom-to-top.</div>`;
+  if (decVal === 0) return h + `<div class="step-row" style="color:var(--accent2)">0 is 0.</div>`;
+  return h + divisionSteps(decVal, 16, 'var(--accent2)', '0123456789ABCDEF');
+}
+
+function section_htod(decVal) {
+  const hexStr = decVal.toString(16).toUpperCase();
+  let h = `<div class="steps-title">▸ HEX → DECIMAL</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Each hex digit represents a power of 16. A=10, B=11, C=12, D=13, E=14, F=15. Multiply each by its power of 16 and sum.</div>`;
+  const { expr, sum } = positionExpand(hexStr, 16, 'var(--accent2)', true);
+  h += `<div class="step-row" style="flex-wrap:wrap;gap:6px">${expr}</div>`;
+  h += sum.length
+    ? `<div class="step-row" style="color:var(--muted)">Sum: ${sum.join(' + ')} = <b style="color:var(--accent3)">${decVal}</b></div>`
+    : `<div class="step-row" style="color:var(--accent3)">Value is <b>0</b>.</div>`;
+  return h;
+}
+
+function section_otob(decVal) {
+  const octStr = decVal.toString(8);
+  const binStr = decVal.toString(2);
+  let h = `<div class="steps-title">▸ OCTAL → BINARY</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Replace each octal digit with its 3-bit binary equivalent.</div>`;
+  octStr.split('').forEach(d => {
+    const b = parseInt(d).toString(2).padStart(3, '0');
+    h += `<div class="step-row"><span class="step-op">${d}<sub>8</sub></span><span style="color:var(--muted)">→</span><span class="step-rem">${b}</span></div>`;
+  });
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">Concatenate (drop leading zeros): <b style="color:var(--accent3)">${binStr}</b></div>`;
+  return h;
+}
+
+function section_btoo(decVal) {
+  const binStr = decVal.toString(2);
+  const octStr = decVal.toString(8);
+  const groups = binaryToOctalGrouped(binStr);
+  let h = `<div class="steps-title">▸ BINARY → OCTAL</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Group bits into triplets from the right (pad with 0s on the left if needed). Each triplet converts to one octal digit.</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:4px">Binary: <b style="color:var(--accent3)">${binStr}</b> → padded to triplets: <b style="color:var(--accent)">${groups.map(g=>g.bits).join(' ')}</b></div>`;
+  groups.forEach(g => {
+    h += `<div class="step-row"><span class="step-op">${g.bits}</span><span style="color:var(--muted)">→</span><span class="step-rem">${g.oct}<sub>8</sub></span></div>`;
+  });
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">Result: <b style="color:var(--accent4)">${octStr}</b></div>`;
+  return h;
+}
+
+function section_htob(decVal) {
+  const hexStr = decVal.toString(16).toUpperCase();
+  const binStr = decVal.toString(2);
+  let h = `<div class="steps-title">▸ HEX → BINARY</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Replace each hex digit with its 4-bit (nibble) binary equivalent.</div>`;
+  hexStr.split('').forEach(d => {
+    const b = parseInt(d, 16).toString(2).padStart(4, '0');
+    h += `<div class="step-row"><span class="step-op">${d}<sub>16</sub></span><span style="color:var(--muted)">→</span><span class="step-rem">${b}</span></div>`;
+  });
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">Concatenate (drop leading zeros): <b style="color:var(--accent3)">${binStr}</b></div>`;
+  return h;
+}
+
+function section_btoh(decVal) {
+  const binStr = decVal.toString(2);
+  const hexStr = decVal.toString(16).toUpperCase();
+  const groups = binaryToHexGrouped(binStr);
+  let h = `<div class="steps-title">▸ BINARY → HEX</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Group bits into nibbles (4 bits) from the right. Each nibble = one hex digit.</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:4px">Binary: <b style="color:var(--accent3)">${binStr}</b> → padded nibbles: <b style="color:var(--accent)">${groups.map(g=>g.bits).join(' ')}</b></div>`;
+  groups.forEach(g => {
+    h += `<div class="step-row"><span class="step-op">${g.bits}</span><span style="color:var(--muted)">→</span><span class="step-rem">${g.hex}<sub>16</sub></span></div>`;
+  });
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">Result: <b style="color:var(--accent2)">${hexStr}</b></div>`;
+  return h;
+}
+
+function section_dtobcd(decVal) {
+  const digits = decVal.toString().split('');
+  let h = `<div class="steps-title">▸ DECIMAL → BCD (Binary-Coded Decimal)</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">BCD encodes each decimal digit separately as a 4-bit binary group. Unlike straight binary, BCD keeps the digits distinct.</div>`;
+  digits.forEach(d => {
+    const b = parseInt(d).toString(2).padStart(4, '0');
+    h += `<div class="step-row"><span class="step-op">digit <b>${d}</b></span><span style="color:var(--muted)">→</span><span class="step-rem">${b}</span></div>`;
+  });
+  const bcdResult = digits.map(d => parseInt(d).toString(2).padStart(4,'0')).join(' ');
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">BCD result: <b style="color:var(--accent)">${bcdResult}</b></div>`;
+  const straightBin = decVal.toString(2);
+  h += `<div class="step-row" style="color:var(--muted);margin-top:2px">Compare: straight binary of ${decVal} = <b style="color:var(--accent3)">${straightBin}</b> (${straightBin.length} bits) vs BCD = ${bcdResult.replace(/ /g,'').length} bits</div>`;
+  return h;
+}
+
+// ── otoh / htoo via intermediate ──────────────────────────────────────────────
+
+function section_otoh(decVal) {
+  const octStr = decVal.toString(8);
+  const binStr = decVal.toString(2);
+  const hexStr = decVal.toString(16).toUpperCase();
+  let h = `<div class="steps-title">▸ OCTAL → HEX</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">No direct shortcut — convert Octal → Binary first (each octal digit → 3 bits), then regroup into nibbles (4 bits) → Hex.</div>`;
+
+  // Step 1: oct → bin
+  h += `<div class="step-row" style="color:var(--accent4);margin-top:4px"><b>Step 1: Octal → Binary</b></div>`;
+  octStr.split('').forEach(d => {
+    const b = parseInt(d).toString(2).padStart(3,'0');
+    h += `<div class="step-row"><span class="step-op">${d}<sub>8</sub></span><span style="color:var(--muted)">→</span><span class="step-rem">${b}</span></div>`;
+  });
+  h += `<div class="step-row" style="color:var(--muted)">Binary so far: <b style="color:var(--accent3)">${binStr}</b></div>`;
+
+  // Step 2: bin → hex
+  h += `<div class="step-row" style="color:var(--accent2);margin-top:6px"><b>Step 2: Binary → Hex (regroup into nibbles)</b></div>`;
+  const groups = binaryToHexGrouped(binStr);
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:4px">Nibbles: <b style="color:var(--accent)">${groups.map(g=>g.bits).join(' ')}</b></div>`;
+  groups.forEach(g => {
+    h += `<div class="step-row"><span class="step-op">${g.bits}</span><span style="color:var(--muted)">→</span><span class="step-rem">${g.hex}<sub>16</sub></span></div>`;
+  });
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">Result: <b style="color:var(--accent2)">${hexStr}</b></div>`;
+  return h;
+}
+
+function section_htoo(decVal) {
+  const hexStr = decVal.toString(16).toUpperCase();
+  const binStr = decVal.toString(2);
+  const octStr = decVal.toString(8);
+  let h = `<div class="steps-title">▸ HEX → OCTAL</div>`;
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:6px">Convert Hex → Binary first (each hex digit → 4 bits), then regroup into triplets → Octal.</div>`;
+
+  // Step 1: hex → bin
+  h += `<div class="step-row" style="color:var(--accent2);margin-top:4px"><b>Step 1: Hex → Binary</b></div>`;
+  hexStr.split('').forEach(d => {
+    const b = parseInt(d,16).toString(2).padStart(4,'0');
+    h += `<div class="step-row"><span class="step-op">${d}<sub>16</sub></span><span style="color:var(--muted)">→</span><span class="step-rem">${b}</span></div>`;
+  });
+  h += `<div class="step-row" style="color:var(--muted)">Binary so far: <b style="color:var(--accent3)">${binStr}</b></div>`;
+
+  // Step 2: bin → oct
+  h += `<div class="step-row" style="color:var(--accent4);margin-top:6px"><b>Step 2: Binary → Octal (regroup into triplets)</b></div>`;
+  const groups = binaryToOctalGrouped(binStr);
+  h += `<div class="step-row" style="color:var(--muted);margin-bottom:4px">Triplets: <b style="color:var(--accent)">${groups.map(g=>g.bits).join(' ')}</b></div>`;
+  groups.forEach(g => {
+    h += `<div class="step-row"><span class="step-op">${g.bits}</span><span style="color:var(--muted)">→</span><span class="step-rem">${g.oct}<sub>8</sub></span></div>`;
+  });
+  h += `<div class="step-row" style="margin-top:4px;color:var(--muted)">Result: <b style="color:var(--accent4)">${octStr}</b></div>`;
+  return h;
+}
+
+// ── labels for header ─────────────────────────────────────────────────────────
+const BASE_NAMES = { dec: 'Decimal', bin: 'Binary', oct: 'Octal', hex: 'Hex' };
+const BASE_COLORS = { dec: 'var(--accent)', bin: 'var(--accent3)', oct: 'var(--accent4)', hex: 'var(--accent2)' };
+
+// ── main entry point ──────────────────────────────────────────────────────────
+function updateSteps(decVal, from) {
+  const content = document.getElementById('steps-content');
+  if (decVal === null) { content.innerHTML = ''; return; }
+
+  const binVal = decVal.toString(2);
+  const octVal = decVal.toString(8);
+  const hexVal = decVal.toString(16).toUpperCase();
+
+  // Header showing current value in all bases
+  const fromColor = BASE_COLORS[from] || 'var(--text)';
+  const fromName  = BASE_NAMES[from]  || from;
+  const fromVal   = from === 'dec' ? decVal : from === 'bin' ? binVal : from === 'oct' ? octVal : hexVal;
+
+  let html = `<div class="step-row" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <span style="color:var(--muted)">You typed</span>
+    <b style="color:${fromColor}">${fromVal}</b>
+    <span style="color:var(--muted)">(${fromName}). Here are all the conversion paths:</span>
+  </div>`;
+
+  // Always show the 11 conversions, with the "typed direction" first highlighted
+  const sections = [];
+
+  if (from === 'dec') {
+    sections.push(section_dtob(decVal), section_dtoo(decVal), section_dtoh(decVal), section_dtobcd(decVal));
+    sections.push(`<br>`, section_btod(decVal), section_otod(decVal), section_htod(decVal));
+    sections.push(`<br>`, section_btoo(decVal), section_btoh(decVal), section_otob(decVal), section_htob(decVal));
+    sections.push(`<br>`, section_otoh(decVal), section_htoo(decVal));
+  } else if (from === 'bin') {
+    sections.push(section_btod(decVal), section_btoo(decVal), section_btoh(decVal));
+    sections.push(`<br>`, section_dtob(decVal), section_otob(decVal), section_htob(decVal));
+    sections.push(`<br>`, section_dtoo(decVal), section_otod(decVal), section_dtoh(decVal), section_htod(decVal));
+    sections.push(`<br>`, section_dtobcd(decVal), section_otoh(decVal), section_htoo(decVal));
+  } else if (from === 'oct') {
+    sections.push(section_otod(decVal), section_otob(decVal), section_otoh(decVal));
+    sections.push(`<br>`, section_dtoo(decVal), section_btoo(decVal), section_htoo(decVal));
+    sections.push(`<br>`, section_dtob(decVal), section_btod(decVal), section_dtoh(decVal), section_htod(decVal));
+    sections.push(`<br>`, section_dtobcd(decVal), section_btoh(decVal), section_htob(decVal));
+  } else if (from === 'hex') {
+    sections.push(section_htod(decVal), section_htob(decVal), section_htoo(decVal));
+    sections.push(`<br>`, section_dtoh(decVal), section_btoh(decVal), section_otoh(decVal));
+    sections.push(`<br>`, section_dtob(decVal), section_btod(decVal), section_dtoo(decVal), section_otod(decVal));
+    sections.push(`<br>`, section_dtobcd(decVal), section_btoo(decVal), section_otob(decVal));
+  }
+
+  html += sections.join('');
+  content.innerHTML = html;
+}
+
+function toggleSteps() {
+  stepsOpen = !stepsOpen;
+  const btn = document.getElementById('steps-btn');
+  const content = document.getElementById('steps-content');
+  btn.classList.toggle('open', stepsOpen);
+  content.classList.toggle('open', stepsOpen);
+  btn.querySelector('.arrow').textContent = stepsOpen ? '▼' : '▶';
+  btn.childNodes[1].textContent = stepsOpen ? ' Hide conversion math' : ' Show all 11 conversion paths';
+}
+
+function addHistory(decVal) {
+  // Deduplicate
+  if (history.length && history[0].dec === decVal) return;
+  history.unshift({
+    dec: decVal,
+    bin: decVal.toString(2),
+    oct: decVal.toString(8),
+    hex: decVal.toString(16).toUpperCase()
+  });
+  if (history.length > 10) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!history.length) {
+    list.innerHTML = '<div class="empty-state">No conversions yet</div>';
+    return;
+  }
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <span class="history-dec">${h.dec}</span>
+      <span class="history-meta">${h.bin} | 0x${h.hex}</span>
+    </div>
+  `).join('');
+}
+
+function loadHistory(i) {
+  const h = history[i];
+  document.getElementById('dec').value = h.dec;
+  convert('dec');
+}
+
+function clearHistory() {
+  history = [];
+  renderHistory();
+}
+
+function copyField(base) {
+  const val = document.getElementById(base).value;
+  if (!val) return;
+  navigator.clipboard.writeText(val);
+  const btn = document.querySelector(`#field-${base} .copy-btn`);
+  btn.textContent = 'DONE!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1200);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['dec','bin','oct','hex'].forEach(b => document.getElementById(b).value = '');
+    currentDecimal = null;
+    updateBits(0);
+    updateAscii(null);
+    updateColor(null);
+    updateSteps(null, null);
+  }
+  if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && document.activeElement.id === 'dec') {
+    e.preventDefault();
+    const cur = parseInt(document.getElementById('dec').value || '0', 10);
+    const next = e.key === 'ArrowUp' ? cur + 1 : Math.max(0, cur - 1);
+    document.getElementById('dec').value = next;
+    convert('dec');
+  }
+});
+
+// Init
+updateBits(0);
+</script>
+</body>
+</html>
