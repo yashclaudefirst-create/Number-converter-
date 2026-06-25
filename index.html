@@ -573,10 +573,10 @@
       <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border)">
         <div class="section-title" style="margin-bottom:10px">Valid Characters</div>
         <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--muted)">
-          <span style="color:var(--accent)">DEC</span> → 0–9<br>
-          <span style="color:var(--accent3)">BIN</span> → 0, 1<br>
-          <span style="color:var(--accent4)">OCT</span> → 0–7<br>
-          <span style="color:var(--accent2)">HEX</span> → 0–9, A–F
+          <span style="color:var(--accent)">DECIMAL</span> → 0–9<br>
+          <span style="color:var(--accent3)">BINARY</span> → 0, 1<br>
+          <span style="color:var(--accent4)">OCTAL</span> → 0–7<br>
+          <span style="color:var(--accent2)">HEXADECIMAL</span> → 0–9, A–F
         </div>
       </div>
     </div>
@@ -720,12 +720,12 @@ function updateColor(decVal) {
     const g = parseInt(hexVal.slice(2,4),16);
     const b = parseInt(hexVal.slice(4,6),16);
     const brightness = (r*299 + g*587 + b*114) / 1000;
-    info.innerHTML = `HEX: <span style="color:var(--accent2)">${hex6.toUpperCase()}</span><br>RGB: <span style="color:var(--accent)">rgb(${r}, ${g}, ${b})</span><br>Brightness: <span style="color:var(--accent4)">${Math.round(brightness)} / 255</span><br>Tone: <span style="color:var(--accent3)">${brightness > 128 ? 'Light' : 'Dark'}</span>`;
+    info.innerHTML = `Hexadecimal: <span style="color:var(--accent2)">${hex6.toUpperCase()}</span><br>RGB: <span style="color:var(--accent)">rgb(${r}, ${g}, ${b})</span><br>Brightness: <span style="color:var(--accent4)">${Math.round(brightness)} / 255</span><br>Tone: <span style="color:var(--accent3)">${brightness > 128 ? 'Light' : 'Dark'}</span>`;
   } else if (hexVal.length === 3) {
     section.style.display = 'block';
     const exp = '#' + hexVal[0]+hexVal[0]+hexVal[1]+hexVal[1]+hexVal[2]+hexVal[2];
     swatch.style.background = exp;
-    info.innerHTML = `HEX shorthand: <span style="color:var(--accent2)">#${hexVal.toUpperCase()}</span><br>Expanded: <span style="color:var(--accent)">${exp.toUpperCase()}</span>`;
+    info.innerHTML = `Hexadecimal shorthand: <span style="color:var(--accent2)">#${hexVal.toUpperCase()}</span><br>Expanded: <span style="color:var(--accent)">${exp.toUpperCase()}</span>`;
   } else {
     section.style.display = 'none';
   }
