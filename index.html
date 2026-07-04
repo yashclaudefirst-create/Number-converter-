@@ -155,24 +155,28 @@
     font-size: 18px;
     font-weight: 600;
     color: var(--text);
-    padding: 4px 0;
+    padding: 4px 60px 4px 0;
   }
 
   .field input::placeholder { color: var(--muted); font-weight: 300; }
 
   .copy-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 10px;
+    right: 10px;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
     border-radius: 6px;
-    padding: 4px 8px;
+    padding: 8px 12px;
     font-size: 10px;
     font-family: var(--mono);
     cursor: pointer;
     transition: all 0.2s;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
   .copy-btn.copied { border-color: var(--accent3); color: var(--accent3); }
@@ -393,12 +397,13 @@
     justify-content: space-between;
     background: var(--surface2);
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 12px 16px;
     font-family: var(--mono);
     font-size: 11px;
     cursor: pointer;
     transition: border 0.2s;
     border: 1px solid transparent;
+    min-height: 44px;
   }
   .history-item:hover { border-color: var(--border); }
 
@@ -478,36 +483,36 @@
   <!-- Input Fields -->
   <div class="input-grid">
     <div class="field" id="field-dec">
-      <div class="field-label dec-label">
+      <label for="dec" class="field-label dec-label">
         <span>Decimal</span>
         <span class="badge dec-badge">BASE 10</span>
-      </div>
-      <button class="copy-btn" onclick="copyField('dec')">COPY</button>
-      <input type="text" id="dec" placeholder="0" maxlength="20" oninput="convert('dec')" />
+      </label>
+      <button class="copy-btn" onclick="copyField('dec')" aria-label="Copy decimal value">COPY</button>
+      <input type="text" id="dec" placeholder="0" maxlength="20" oninput="convert('dec')" inputmode="numeric" autocorrect="off" autocapitalize="none" spellcheck="false" />
     </div>
     <div class="field" id="field-bin">
-      <div class="field-label bin-label">
+      <label for="bin" class="field-label bin-label">
         <span>Binary</span>
         <span class="badge bin-badge">BASE 2</span>
-      </div>
-      <button class="copy-btn" onclick="copyField('bin')">COPY</button>
-      <input type="text" id="bin" placeholder="0" maxlength="64" oninput="convert('bin')" />
+      </label>
+      <button class="copy-btn" onclick="copyField('bin')" aria-label="Copy binary value">COPY</button>
+      <input type="text" id="bin" placeholder="0" maxlength="64" oninput="convert('bin')" inputmode="numeric" autocorrect="off" autocapitalize="none" spellcheck="false" />
     </div>
     <div class="field" id="field-oct">
-      <div class="field-label oct-label">
+      <label for="oct" class="field-label oct-label">
         <span>Octal</span>
         <span class="badge oct-badge">BASE 8</span>
-      </div>
-      <button class="copy-btn" onclick="copyField('oct')">COPY</button>
-      <input type="text" id="oct" placeholder="0" maxlength="22" oninput="convert('oct')" />
+      </label>
+      <button class="copy-btn" onclick="copyField('oct')" aria-label="Copy octal value">COPY</button>
+      <input type="text" id="oct" placeholder="0" maxlength="22" oninput="convert('oct')" inputmode="numeric" autocorrect="off" autocapitalize="none" spellcheck="false" />
     </div>
     <div class="field" id="field-hex">
-      <div class="field-label hex-label">
+      <label for="hex" class="field-label hex-label">
         <span>Hexadecimal</span>
         <span class="badge hex-badge">BASE 16</span>
-      </div>
-      <button class="copy-btn" onclick="copyField('hex')">COPY</button>
-      <input type="text" id="hex" placeholder="0" maxlength="16" oninput="convert('hex')" />
+      </label>
+      <button class="copy-btn" onclick="copyField('hex')" aria-label="Copy hexadecimal value">COPY</button>
+      <input type="text" id="hex" placeholder="0" maxlength="16" oninput="convert('hex')" autocorrect="off" autocapitalize="none" spellcheck="false" />
     </div>
   </div>
 
