@@ -544,9 +544,9 @@
 
   <!-- Step by Step -->
   <div class="section">
-    <div class="section-title">Step-by-Step Conversion <span style="font-size:9px;color:var(--accent);margin-left:6px">ALL 11 PATHS</span></div>
+    <div class="section-title">Step-by-Step Conversion <span style="font-size:9px;color:var(--accent);margin-left:6px">ALL 13 PATHS</span></div>
     <button class="steps-toggle" id="steps-btn" onclick="toggleSteps()">
-      <span class="arrow">▶</span> Show conversion math
+      <span class="arrow">▶</span> <span class="btn-label">Show conversion math</span>
     </button>
     <div class="steps-content" id="steps-content"></div>
   </div>
@@ -1050,7 +1050,7 @@ function toggleSteps() {
   btn.classList.toggle('open', stepsOpen);
   content.classList.toggle('open', stepsOpen);
   btn.querySelector('.arrow').textContent = stepsOpen ? '▼' : '▶';
-  btn.childNodes[1].textContent = stepsOpen ? ' Hide conversion math' : ' Show all 11 conversion paths';
+  btn.querySelector('.btn-label').textContent = stepsOpen ? ' Hide conversion math' : ' Show all 13 conversion paths';
 }
 
 function addHistory(decVal) {
