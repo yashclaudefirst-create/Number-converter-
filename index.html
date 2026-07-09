@@ -173,7 +173,7 @@
     font-family: var(--mono);
     cursor: pointer;
     transition: all 0.2s;
-    min-height: 32px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -551,7 +551,7 @@
   <div class="section">
     <div class="section-title">Step-by-Step Conversion <span style="font-size:9px;color:var(--accent);margin-left:6px">ALL 13 PATHS</span></div>
     <button class="steps-toggle" id="steps-btn" onclick="toggleSteps()">
-      <span class="arrow">▶</span> <span class="btn-label">Show conversion math</span>
+      <span class="arrow">▶</span> <span class="btn-label">Show all 13 conversion paths</span>
     </button>
     <div class="steps-content" id="steps-content"></div>
   </div>
@@ -606,18 +606,9 @@ function convert(from) {
   const val = input.value.trim();
   const field = document.getElementById('field-' + from);
 
-  // Validate
-  if (!validators[from].test(val)) {
-    field.classList.add('error');
-    setTimeout(() => field.classList.remove('error'), 500);
-    input.value = val.slice(0, -1);
-    return;
-  }
-
-  field.classList.remove('error');
-
-  if (val === '' || val === null) {
-    ['dec','bin','oct','hex'].filter(b => b !== from).forEach(b => {
+  if (val === '') {
+    field.classList.remove('error');
+    ['dec', 'bin', 'oct', 'hex'].filter(b => b !== from).forEach(b => {
       document.getElementById(b).value = '';
     });
     currentDecimal = null;
@@ -629,22 +620,38 @@ function convert(from) {
   }
 
   let decVal;
-  try {
-    switch(from) {
-      case 'dec': decVal = parseInt(val, 10); break;
-      case 'bin': decVal = parseInt(val, 2); break;
-      case 'oct': decVal = parseInt(val, 8); break;
-      case 'hex': decVal = parseInt(val, 16); break;
-    }
-  } catch(e) { return; }
+  let isValid = validators[from].test(val);
 
-  if (isNaN(decVal) || decVal < 0) return;
-  if (decVal > 4294967295) { // 32-bit max
-    document.getElementById('field-' + from).classList.add('error');
-    setTimeout(() => document.getElementById('field-' + from).classList.remove('error'), 400);
+  if (isValid) {
+    try {
+      switch (from) {
+        case 'dec': decVal = parseInt(val, 10); break;
+        case 'bin': decVal = parseInt(val, 2); break;
+        case 'oct': decVal = parseInt(val, 8); break;
+        case 'hex': decVal = parseInt(val, 16); break;
+      }
+      if (isNaN(decVal) || decVal < 0 || decVal > 4294967295) isValid = false;
+    } catch (e) { isValid = false; }
+  }
+
+  if (!isValid) {
+    field.classList.add('error');
+    setTimeout(() => field.classList.remove('error'), 500);
+    // Revert to last valid state
+    if (currentDecimal === null) {
+      input.value = '';
+    } else {
+      switch (from) {
+        case 'dec': input.value = currentDecimal; break;
+        case 'bin': input.value = currentDecimal.toString(2); break;
+        case 'oct': input.value = currentDecimal.toString(8); break;
+        case 'hex': input.value = currentDecimal.toString(16).toUpperCase(); break;
+      }
+    }
     return;
   }
 
+  field.classList.remove('error');
   currentDecimal = decVal;
 
   if (from !== 'dec') document.getElementById('dec').value = decVal;
@@ -705,7 +712,7 @@ function updateAscii(decVal) {
   }
   const c = String.fromCharCode(decVal);
   const isPrintable = decVal >= 32 && decVal <= 126;
-  char.textContent = isPrintable ? c : '␀';
+  char.textContent = (decVal === 0) ? '␀' : (isPrintable ? c : '—');
   const names = {0:'NUL',7:'BEL',8:'BS',9:'TAB',10:'LF',13:'CR',27:'ESC',32:'SPACE',127:'DEL'};
   const name = names[decVal] || (isPrintable ? `'${c}'` : `CTRL+${decVal}`);
   info.innerHTML = `Char: <span style="color:var(--accent2)">${name}</span><br>Printable: <span style="color:var(--accent3)">${isPrintable ? 'Yes' : 'No'}</span><br>Code: <span style="color:var(--accent4)">U+${decVal.toString(16).toUpperCase().padStart(4,'0')}</span>`;
@@ -1054,8 +1061,7 @@ function toggleSteps() {
   const content = document.getElementById('steps-content');
   btn.classList.toggle('open', stepsOpen);
   content.classList.toggle('open', stepsOpen);
-  btn.querySelector('.arrow').textContent = stepsOpen ? '▼' : '▶';
-  btn.querySelector('.btn-label').textContent = stepsOpen ? ' Hide conversion math' : ' Show all 13 conversion paths';
+  btn.querySelector('.btn-label').textContent = stepsOpen ? 'Hide conversion math' : 'Show all 13 conversion paths';
 }
 
 function addHistory(decVal) {
