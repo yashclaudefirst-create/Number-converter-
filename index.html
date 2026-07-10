@@ -173,7 +173,8 @@
     font-family: var(--mono);
     cursor: pointer;
     transition: all 0.2s;
-    min-height: 32px;
+    min-height: 44px;
+    min-width: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,6 +229,8 @@
     font-family: var(--mono);
     cursor: pointer;
     transition: all 0.2s;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .bit-toggle button.active {
@@ -347,6 +350,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    min-height: 44px;
+    min-width: 44px;
   }
   .steps-toggle:hover { border-color: var(--accent); color: var(--accent); }
   .steps-toggle .arrow { transition: transform 0.2s; }
@@ -551,7 +556,7 @@
   <div class="section">
     <div class="section-title">Step-by-Step Conversion <span style="font-size:9px;color:var(--accent);margin-left:6px">ALL 13 PATHS</span></div>
     <button class="steps-toggle" id="steps-btn" onclick="toggleSteps()">
-      <span class="arrow">▶</span> <span class="btn-label">Show conversion math</span>
+      <span class="arrow">▶</span> <span class="btn-label">Show all 13 conversion paths</span>
     </button>
     <div class="steps-content" id="steps-content"></div>
   </div>
@@ -610,7 +615,14 @@ function convert(from) {
   if (!validators[from].test(val)) {
     field.classList.add('error');
     setTimeout(() => field.classList.remove('error'), 500);
-    input.value = val.slice(0, -1);
+    if (currentDecimal !== null) {
+      if (from === 'dec') input.value = currentDecimal;
+      else if (from === 'bin') input.value = currentDecimal.toString(2);
+      else if (from === 'oct') input.value = currentDecimal.toString(8);
+      else if (from === 'hex') input.value = currentDecimal.toString(16).toUpperCase();
+    } else {
+      input.value = '';
+    }
     return;
   }
 
@@ -640,8 +652,16 @@ function convert(from) {
 
   if (isNaN(decVal) || decVal < 0) return;
   if (decVal > 4294967295) { // 32-bit max
-    document.getElementById('field-' + from).classList.add('error');
-    setTimeout(() => document.getElementById('field-' + from).classList.remove('error'), 400);
+    field.classList.add('error');
+    setTimeout(() => field.classList.remove('error'), 400);
+    if (currentDecimal !== null) {
+      if (from === 'dec') input.value = currentDecimal;
+      else if (from === 'bin') input.value = currentDecimal.toString(2);
+      else if (from === 'oct') input.value = currentDecimal.toString(8);
+      else if (from === 'hex') input.value = currentDecimal.toString(16).toUpperCase();
+    } else {
+      input.value = '';
+    }
     return;
   }
 
@@ -705,7 +725,7 @@ function updateAscii(decVal) {
   }
   const c = String.fromCharCode(decVal);
   const isPrintable = decVal >= 32 && decVal <= 126;
-  char.textContent = isPrintable ? c : '␀';
+  char.textContent = isPrintable ? c : (decVal === 0 ? '␀' : '—');
   const names = {0:'NUL',7:'BEL',8:'BS',9:'TAB',10:'LF',13:'CR',27:'ESC',32:'SPACE',127:'DEL'};
   const name = names[decVal] || (isPrintable ? `'${c}'` : `CTRL+${decVal}`);
   info.innerHTML = `Char: <span style="color:var(--accent2)">${name}</span><br>Printable: <span style="color:var(--accent3)">${isPrintable ? 'Yes' : 'No'}</span><br>Code: <span style="color:var(--accent4)">U+${decVal.toString(16).toUpperCase().padStart(4,'0')}</span>`;
@@ -1054,8 +1074,7 @@ function toggleSteps() {
   const content = document.getElementById('steps-content');
   btn.classList.toggle('open', stepsOpen);
   content.classList.toggle('open', stepsOpen);
-  btn.querySelector('.arrow').textContent = stepsOpen ? '▼' : '▶';
-  btn.querySelector('.btn-label').textContent = stepsOpen ? ' Hide conversion math' : ' Show all 13 conversion paths';
+  btn.querySelector('.btn-label').textContent = stepsOpen ? 'Hide conversion math' : 'Show all 13 conversion paths';
 }
 
 function addHistory(decVal) {
