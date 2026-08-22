@@ -1121,6 +1121,7 @@ function renderHistory() {
 
 function loadHistory(i) {
   const h = history[i];
+  if (!h) return;
   document.getElementById('dec').value = h.dec;
   convert('dec');
 }
@@ -1133,11 +1134,32 @@ function clearHistory() {
 function copyField(base) {
   const val = document.getElementById(base).value;
   if (!val) return;
-  navigator.clipboard.writeText(val);
   const btn = document.querySelector(`#field-${base} .copy-btn`);
-  btn.textContent = 'DONE!';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1200);
+  const markDone = () => {
+    btn.textContent = 'DONE!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1200);
+  };
+
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = val;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      markDone();
+    } catch(e) {}
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(val).then(markDone).catch(fallback);
+  } else {
+    fallback();
+  }
 }
 
 // Keyboard shortcuts
