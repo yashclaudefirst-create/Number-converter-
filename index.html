@@ -1121,6 +1121,7 @@ function renderHistory() {
 
 function loadHistory(i) {
   const h = history[i];
+  if (!h) return;
   document.getElementById('dec').value = h.dec;
   convert('dec');
 }
